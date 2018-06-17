@@ -454,7 +454,7 @@ class API extends \Piwik\Plugin\API
         $apiParameters = array();
         $entityNames = StaticContainer::get('entities.idNames');
         foreach ($entityNames as $entityName) {
-            if ($entityName === 'idGoal' && $idGoal) {
+            if ($entityName === 'idGoal' && is_numeric($idGoal)) {
                 $apiParameters['idGoal'] = $idGoal;
             } elseif ($entityName === 'idDimension' && $idDimension) {
                 $apiParameters['idDimension'] = $idDimension;
@@ -749,8 +749,14 @@ class Plugin extends \Piwik\Plugin
     public function registerEvents()
     {
         return array(
-            'AssetManager.getStylesheetFiles' => 'getStylesheetFiles'
+            'AssetManager.getStylesheetFiles' => 'getStylesheetFiles',
+            'Platform.initialized' => 'detectIsApiRequest'
         );
+    }
+
+    public function detectIsApiRequest()
+    {
+        Request::setIsRootRequestApiRequest(Request::isApiRequest($request = null));
     }
 
     public function getStylesheetFiles(&$stylesheets)

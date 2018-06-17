@@ -275,7 +275,7 @@ $.extend(DataTable.prototype, UIControl.prototype, {
         });
         ajaxRequest.setFormat('html');
 
-        ajaxRequest.send(false);
+        ajaxRequest.send();
     },
 
     // Function called when the AJAX request is successful
@@ -626,20 +626,30 @@ $.extend(DataTable.prototype, UIControl.prototype, {
     },
 
     handleLimit: function (domElem) {
-            var tableRowLimits = piwik.config.datatable_row_limits,
-            evolutionLimits =
-            {
-                day: [8, 30, 60, 90, 180, 365, 500],
-                week: [4, 12, 26, 52, 104, 500],
-                month: [3, 6, 12, 24, 36, 120],
-                year: [3, 5, 10]
-            };
+        var tableRowLimits = piwik.config.datatable_row_limits,
+        evolutionLimits =
+        {
+            day: [8, 30, 60, 90, 180, 365, 500],
+            week: [4, 12, 26, 52, 104, 500],
+            month: [3, 6, 12, 24, 36, 120],
+            year: [3, 5, 10]
+        };
 
         var self = this;
         if (typeof self.parentId != "undefined" && self.parentId != '') {
             // no limit selector for subtables
             $('.limitSelection', domElem).remove();
             return;
+        }
+
+        if (self.props.disable_all_rows_filter_limit) { // remove the -1 value from the limits array
+            var tempTableRowLimits = [];
+            tableRowLimits.forEach(function (limit) {
+                if (limit != -1) {
+                    tempTableRowLimits.push(limit);
+                }
+            });
+            tableRowLimits = tempTableRowLimits;
         }
 
         // configure limit control
@@ -709,6 +719,8 @@ $.extend(DataTable.prototype, UIControl.prototype, {
             }
 
             $limitSelect.material_select();
+
+            $('.limitSelection input', domElem).attr('title', _pk_translate('General_RowsToDisplay'));
         }
         else {
             $('.limitSelection', domElem).hide();
@@ -1349,7 +1361,7 @@ $.extend(DataTable.prototype, UIControl.prototype, {
             }, 'post');
             ajaxRequest.setCallback(function () {});
             ajaxRequest.setFormat('html');
-            ajaxRequest.send(false);
+            ajaxRequest.send();
         }
     },
 
